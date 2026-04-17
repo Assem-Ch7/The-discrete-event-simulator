@@ -1,5 +1,5 @@
 # message.py
-
+#message id should automatically increment for sure
 class Message:
     def __init__(self, message_id, source, destination, timestamp):
         self._message_id = message_id
