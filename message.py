@@ -1,7 +1,7 @@
 # message.py
 #message id should automatically increment for sure 
 class Message:
-    _id_counter = 1 
+    _id_counter = 1
 
     def __init__(self, source, destination, timestamp):
         self._message_id = Message._id_counter

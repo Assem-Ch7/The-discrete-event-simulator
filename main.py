@@ -28,18 +28,24 @@ class Main:
         """
         print("--- Testing Event & Scheduler ---")
         
-        msg1 = Message(source=0, destination=1, timestamp=1.202)
-        msg2 = Message(source=0, destination=3, timestamp=2.320)
+        msg1 = Message(source=1, destination=0, timestamp=1.202)
+        msg2 = Message(source=3, destination=0, timestamp=2.320)
 
         event1 = Event(event_type=EventType.SEND_MSG, event_time=1.202, message=msg1)
-        event2 = Event(event_type=EventType.SEND_MSG, event_time=2.320, message=msg2)
-        event3 = Event(event_type=EventType.RECV_MSG, event_time=1.916, message=msg1)
+        event2 = Event(event_type=EventType.RECV_MSG, event_time=1.916, message=msg1)
+        event3 = Event(event_type=EventType.SEND_MSG, event_time=2.320, message=msg2)
+        event4 = Event(event_type=EventType.RECV_MSG, event_time=2.391, message=msg2)
+        event5 = Event(event_type=EventType.DEPT_MSG, event_time=4.572, message=msg1)
+        event6 = Event(event_type=EventType.DEPT_MSG, event_time=5.916, message=msg2)
 
         # Initialize scheduler and add events
         scheduler = Scheduler()
         scheduler.add_event(event2)
         scheduler.add_event(event1)
         scheduler.add_event(event3)
+        scheduler.add_event(event6)
+        scheduler.add_event(event4)
+        scheduler.add_event(event5)
 
         # Print Trace Header
         print(f"{'time':<8} | {'node':<6} | {'event':<6} | {'source':<6} | {'dest.':<5} | {'msgID'}")
@@ -56,7 +62,12 @@ class Main:
             msg = current_event.get_message()
             
             # Determine node based on trace logic
-            node = "1" if e_type == "SEND" and msg.get_message_id() == 1 else "0"
+            if e_type == "SEND":
+                node = msg.get_source()
+            elif e_type == "RECV":
+                node = msg.get_destination() 
+            else:
+                node = "0"
 
             # Generate the trace for this event by calling Main.generate_trace
             Main.generate_trace(
@@ -70,5 +81,5 @@ class Main:
 
 # The Main entry point
 if __name__ == "__main__":
-    Main.test_message()
+    #Main.test_message()
     Main.test_event()
