@@ -1,24 +1,34 @@
 # create events and show me the trace of the events
 # we don't need meain for engine, jsut put test functions 
 
-# main.py
 from message import Message
 from event import Event, EventType
 from scheduler import Scheduler
 
 class Main:
     @staticmethod
-    def generate_trace(time, node, event_type, source, dest, msg_id):
-        print(f"{time:<8} | {node:<6} | {event_type:<6} | {source:<6} | {dest:<5} | {msg_id}")
+    def GenerateTrace(e):
+        e_time = e.get_event_time()
+        e_type = e.get_event_type().value
+        msg = e.get_message()
+        
+        if e_type == "SEND":
+                node = msg.get_source()
+        elif e_type == "RECV":
+                node = msg.get_destination() 
+        else:
+                node = "0"
+
+        print(f"{e_time:<7.3f} {node:<5} {e_type:<6} {msg.get_source():<6} {msg.get_destination():<5} {msg.get_message_id()}")
 
     @staticmethod
     def test_message():
         print("--- Testing Message ---")
-        msg1 = Message(source=0, destination=1, timestamp=1.202)
-        msg2 = Message(source=0, destination=3, timestamp=1.500)
+        msg1 = Message(source=1, destination=0, timestamp=1.202)
+        msg2 = Message(source=3, destination=0, timestamp=2.320)
         
         msg1.print_message()
-        msg2.print_message() # This will automatically have ID 2
+        msg2.print_message()
         print()
 
     @staticmethod
@@ -36,44 +46,22 @@ class Main:
         event6 = Event(event_type=EventType.DEPT_MSG, event_time=5.916, message=msg2)
 
         scheduler = Scheduler()
-        scheduler.add_event(event2)
-        scheduler.add_event(event1)
-        scheduler.add_event(event3)
-        scheduler.add_event(event6)
         scheduler.add_event(event4)
+        scheduler.add_event(event1)
+        scheduler.add_event(event6)
+        scheduler.add_event(event2)
         scheduler.add_event(event5)
+        scheduler.add_event(event3)
 
-        print(f"{'time':<8} | {'node':<6} | {'event':<6} | {'source':<6} | {'dest.':<5} | {'msgID'}")
-        print("-" * 55)
+        print(f"{'time':<7} {'node':<5} {'event':<6} {'source':<6} {'dest.':<5} {'msgID'}")
 
-        # Process events chronologically
         while True:
             current_event = scheduler.get_event()
             if not current_event:
                 break
             
-            e_time = current_event.get_event_time()
-            e_type = current_event.get_event_type().value
-            msg = current_event.get_message()
-            
-            # Determine node based on trace logic
-            if e_type == "SEND":
-                node = msg.get_source()
-            elif e_type == "RECV":
-                node = msg.get_destination() 
-            else:
-                node = "0"
+            Main.GenerateTrace(current_event)
 
-            Main.generate_trace(
-                time=f"{e_time:.3f}", 
-                node=node, 
-                event_type=e_type, 
-                source=msg.get_source(), 
-                dest=msg.get_destination(), 
-                msg_id=msg.get_message_id()
-            )
-
-# The Main entry point
 if __name__ == "__main__":
     #Main.test_message()
     Main.test_event()
