@@ -23,9 +23,6 @@ class Main:
 
     @staticmethod
     def test_event():
-        """
-        Test function for the Event and Scheduler classes.
-        """
         print("--- Testing Event & Scheduler ---")
         
         msg1 = Message(source=1, destination=0, timestamp=1.202)
@@ -38,7 +35,6 @@ class Main:
         event5 = Event(event_type=EventType.DEPT_MSG, event_time=4.572, message=msg1)
         event6 = Event(event_type=EventType.DEPT_MSG, event_time=5.916, message=msg2)
 
-        # Initialize scheduler and add events
         scheduler = Scheduler()
         scheduler.add_event(event2)
         scheduler.add_event(event1)
@@ -47,7 +43,6 @@ class Main:
         scheduler.add_event(event4)
         scheduler.add_event(event5)
 
-        # Print Trace Header
         print(f"{'time':<8} | {'node':<6} | {'event':<6} | {'source':<6} | {'dest.':<5} | {'msgID'}")
         print("-" * 55)
 
@@ -69,7 +64,6 @@ class Main:
             else:
                 node = "0"
 
-            # Generate the trace for this event by calling Main.generate_trace
             Main.generate_trace(
                 time=f"{e_time:.3f}", 
                 node=node, 
