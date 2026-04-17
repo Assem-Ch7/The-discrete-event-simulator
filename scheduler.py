@@ -18,3 +18,7 @@ class Scheduler:
 
     def get_current_time(self):
         return self._current_time
+
+
+        # it's okay as long the insertion is correct and is sorted correctly and just when i ask you to show me the queue and the order you should be able to do it
+         

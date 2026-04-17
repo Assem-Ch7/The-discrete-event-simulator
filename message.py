@@ -1,5 +1,5 @@
 # message.py
-
+#message id should automatically increment for sure 
 class Message:
     _id_counter = 1 
 
