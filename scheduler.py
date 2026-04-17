@@ -21,4 +21,4 @@ class Scheduler:
 
 
         # it's okay as long the insertion is correct and is sorted correctly and just when i ask you to show me the queue and the order you should be able to do it
-        
+         
