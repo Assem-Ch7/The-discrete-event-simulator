@@ -1,8 +1,12 @@
 # message.py
 
 class Message:
-    def __init__(self, message_id, source, destination, timestamp):
-        self._message_id = message_id
+    _id_counter = 1 
+
+    def __init__(self, source, destination, timestamp):
+        self._message_id = Message._id_counter
+        Message._id_counter += 1
+        
         self._source = source
         self._destination = destination
         self._timestamp = timestamp

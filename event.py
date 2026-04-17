@@ -8,8 +8,12 @@ class EventType(Enum):
     MSG_DEPT = "DEPT"
 
 class Event:
-    def __init__(self, event_id, event_type, event_time, message=None):
-        self._event_id = event_id
+    _id_counter = 101 
+
+    def __init__(self, event_type, event_time, message=None):
+        self._event_id = Event._id_counter
+        Event._id_counter += 1
+        
         self._event_type = event_type
         self._event_time = event_time
         self._message = message
