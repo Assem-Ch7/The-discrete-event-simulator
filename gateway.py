@@ -22,7 +22,7 @@ class Gateway:
             if not srv.is_busy():
                 return srv
         return None
-
+ 
     def handle_arrival(self, message: Message, scheduler=None) -> bool:
         """
         Process a RECV_MSG event.
