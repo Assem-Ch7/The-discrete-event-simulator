@@ -15,8 +15,8 @@ class Client:
     def get_client_id(self):
         return self._client_id
 
-    def generate_message(self):
-        return Message(source=self._client_id, destination=0, timestamp=self.get_next_interarrival_time())
+    def generate_message(self, destination=0):
+        return Message(source=self._client_id, destination=destination, timestamp=self.get_next_interarrival_time())
 
     def print_client(self):
         print(f"Client ID: {self._client_id} | Lambda: {self._lambda} msgs/sec")
