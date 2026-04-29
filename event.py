@@ -5,7 +5,7 @@ from message import Message
 class EventType(Enum):
     SEND_MSG = "SEND"
     RECV_MSG = "RECV"
-    DEPT_MSG = "DEPT"
+    MSG_DEPT = "DEPT"
 
 class Event:
     _id_counter = 101 
