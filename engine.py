@@ -64,12 +64,10 @@ class Main:
     @staticmethod
     def test_client():
         print("--- Testing Client ---")
-        # Initialize client with lambda = 4 (from M/M/1 example)
         client = Client(lambda_rate=4)
         client.print_client()
 
         print("\nGenerating consecutive messages:")
-        # current_time drives the absolute timestamp of each message
         msg1 = client.generate_message(current_time=0.0, destination=2)
         msg2 = client.generate_message(current_time=msg1.get_timestamp(), destination=3)
 
@@ -128,7 +126,6 @@ class Main:
         gw = Gateway(mu=8, num_servers=1, queue_capacity=4)
         gw.print_gateway_state()
 
-        # Manually set scheduler time so _start_service uses correct base
         scheduler._current_time = 1.0
         msg1 = Message(source=1, destination=0, timestamp=1.0)
         gw.handle_arrival(msg1, scheduler)
@@ -149,12 +146,11 @@ class Main:
         print("--- Testing Integrated Simulation (Client -> Gateway -> Queue -> Server) ---")
 
         scheduler = Scheduler()
-        client    = Client(lambda_rate=6)   # 6 msgs/sec arriving
+        client    = Client(lambda_rate=6)
         gateway   = Gateway(mu=8, num_servers=1, queue_capacity=3)
 
         print("\n[Action] Starting simulation engine...")
 
-        # Seed with the first message
         first_msg   = client.generate_message(current_time=0.0)
         first_event = Event(event_type=EventType.SEND_MSG,
                             event_time=first_msg.get_timestamp(),
@@ -180,13 +176,11 @@ class Main:
             current_time = scheduler.get_current_time()
 
             if e_type == EventType.SEND_MSG:
-                # Message travels to gateway (1-second propagation delay)
                 recv_event = Event(event_type=EventType.RECV_MSG,
                                    event_time=current_time + 1.0,
                                    message=msg)
                 scheduler.add_event(recv_event)
 
-                # Client generates the NEXT message
                 next_msg = client.generate_message(current_time)
                 scheduler.add_event(Event(event_type=EventType.SEND_MSG,
                                           event_time=next_msg.get_timestamp(),
@@ -200,8 +194,6 @@ class Main:
 
         gateway.print_gateway_state()
 
-    # ── Simulation engine ────────────────────────────────────────────────────
-
     @staticmethod
     def CreateClients(n_clients, lambda_rate, scheduler, sim_time):
         """
@@ -211,7 +203,6 @@ class Main:
         clients_map = {}
         for _ in range(n_clients):
             c     = Client(lambda_rate=lambda_rate)
-            # generate_message(current_time=0.0) gives absolute timestamp
             msg   = c.generate_message(current_time=0.0)
             if msg.get_timestamp() <= sim_time:
                 scheduler.add_event(
@@ -254,7 +245,6 @@ class Main:
         if verbose:
             print(f"\n{'time':<9} {'node':<5} {'event':<6} {'source':<6} {'dest.':<5} {'msgID'}")
 
-        # ── Event loop ───────────────────────────────────────────────────────
         while True:
             ev = scheduler.get_event()
             if ev is None:
@@ -267,20 +257,15 @@ class Main:
             if t > sim_time:
                 break
 
-            # Accumulate ∫N(t)dt for the interval since last event
             metrics.advance_time(t)
-            # Sync instant counters from gateway
             metrics.sync_counts(gateway.get_n_system(), gateway.get_n_queue())
 
-            # ── SEND_MSG ─────────────────────────────────────────────────────
             if etype == EventType.SEND_MSG:
-                # Schedule RECV_MSG 1 second later (propagation delay)
                 recv_time = t + 1.0
                 if recv_time <= sim_time:
                     scheduler.add_event(
                         Event(EventType.RECV_MSG, event_time=recv_time, message=msg))
 
-                # Schedule the same client's next SEND_MSG
                 client_id = msg.get_source()
                 if client_id in clients_map:
                     next_msg = clients_map[client_id].generate_message(current_time=t)
@@ -290,13 +275,9 @@ class Main:
                                   event_time=next_msg.get_timestamp(),
                                   message=next_msg))
 
-            # ── RECV_MSG ─────────────────────────────────────────────────────
             elif etype == EventType.RECV_MSG:
-                # handle_arrival internally calls metrics.record_arrival()
-                # and metrics.record_drop() via the metrics hook in Gateway
                 gateway.handle_arrival(msg, scheduler)
 
-            # ── MSG_DEPT ─────────────────────────────────────────────────────
             elif etype == EventType.MSG_DEPT:
                 gateway.handle_departure(msg, scheduler)
 

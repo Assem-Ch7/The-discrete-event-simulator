@@ -1,7 +1,3 @@
-# gateway.py
-# Coordinates message flow between Queue and Server(s).
-# Handles arrivals, server allocation, service completion, and drops.
-
 from queue import Queue
 from server import Server
 from message import Message
@@ -24,8 +20,6 @@ class Gateway:
         self._dropped_count = 0
         self._metrics       = metrics
         print(f"[LOG] Gateway initialized | Servers: {num_servers} | Queue Cap: {queue_capacity}")
-
-    # ── Internal helpers ─────────────────────────────────────────────────────
 
     def _get_available_server(self):
         """Return the first idle server, or None if all are busy."""
@@ -55,8 +49,6 @@ class Gateway:
 
         scheduler.add_event(dept_event)
 
-    # ── Public event handlers ────────────────────────────────────────────────
-
     def handle_arrival(self, message: Message, scheduler) -> bool:
         """
         Process a RECV_MSG event.
@@ -67,7 +59,6 @@ class Gateway:
 
         Returns True if accepted, False if dropped.
         """
-        # 1. Try a free server first
         server = self._get_available_server()
         if server:
             print(f"[LOG] ARRIVAL | MsgID: {message.get_message_id()} "
@@ -77,7 +68,6 @@ class Gateway:
                 self._metrics.record_arrival()
             return True
 
-        # 2. All servers busy — try to enqueue
         if not self._queue.enqueue(message):
             self._dropped_count += 1
             print(f"[LOG] DROP | MsgID: {message.get_message_id()} "
@@ -98,7 +88,6 @@ class Gateway:
         Frees the server that just finished. If messages are waiting in the
         queue, the oldest one is dequeued and service starts immediately.
         """
-        # Find the busy server that owns this message (identity check)
         for srv in self._servers:
             if srv.is_busy() and srv._current_message is finished_message:
                 srv.end_service()
@@ -106,7 +95,6 @@ class Gateway:
                       f"left Server {srv.get_server_id()}")
                 break
 
-        # Pull next waiting message from queue
         next_msg = self._queue.dequeue()
         if next_msg:
             server = self._get_available_server()
@@ -114,8 +102,6 @@ class Gateway:
                 self._start_service(next_msg, server, scheduler)
         else:
             print("[LOG] QUEUE EMPTY | Server idle after departure.")
-
-    # ── Accessors / diagnostics ──────────────────────────────────────────────
 
     def get_dropped_count(self):
         return self._dropped_count

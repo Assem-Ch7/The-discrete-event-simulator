@@ -8,11 +8,11 @@ import matplotlib.pyplot as plt
 
 from engine import Main
 
-LAMBDAS   = [4, 6, 8, 12]     # arrival rates to test
-MU        = 8                  # service rate per server
-SIM_TIME  = 30.0              # seconds per run (long enough for steady-state, fast enough to run)
-N_RUNS    = 10                 # independent replications for CI
-Z95       = 1.96               # z-score for 95 % confidence interval
+LAMBDAS   = [8]
+MU        = 8
+SIM_TIME  = 30.0
+N_RUNS    = 10
+Z95       = 1.96
 PLOT_DIR  = os.path.join(os.path.dirname(__file__), "plots")
 
 os.makedirs(PLOT_DIR, exist_ok=True)
@@ -52,7 +52,6 @@ def run_scenario(label, num_servers, queue_capacity, lambdas=LAMBDAS,
         per_run = {k: [] for k in metric_keys}
 
         for run in range(n_runs):
-            # Fix a different seed per run so replications are independent
             random.seed(run * 1000 + int(lam * 10))
 
             m = Main.Run(
@@ -73,7 +72,6 @@ def run_scenario(label, num_servers, queue_capacity, lambdas=LAMBDAS,
             per_run["drop_rate"   ].append(
                 m.get_total_drops() / total_sent if total_sent > 0 else 0.0)
 
-        # Summarise across runs
         rho = lam / (num_servers * mu)
         print(f"\n  lambda={lam:2d}  rho={rho:.3f}")
         print(f"  {'Metric':<22} {'Mean':>10}  {'±95% CI':>10}")
@@ -85,8 +83,6 @@ def run_scenario(label, num_servers, queue_capacity, lambdas=LAMBDAS,
 
     return results
 
-
-# ── Plotting ──────────────────────────────────────────────────────────────────
 
 def plot_metric(scenarios, metric_key, ylabel, title, filename,
                 lambdas=LAMBDAS, include_drops=False):
@@ -143,7 +139,6 @@ def plot_all(scenarios):
                 title      = "Average waiting time in queue (E[W])",
                 filename   = "EW_wait.png")
 
-    # Drop rate only meaningful for finite-capacity models
     finite_scenarios = {k: v for k, v in scenarios.items()
                         if "M/M/1/4" in k or "M/M/1/8" in k or "M/M/3/8" in k}
     if finite_scenarios:
@@ -154,49 +149,40 @@ def plot_all(scenarios):
                     filename   = "drop_rate.png")
 
 
-# ── Main ──────────────────────────────────────────────────────────────────────
-
 def main():
     print("\n" + "#"*60)
     print("#  Discrete-Event Simulator — Queue Model Experiments")
     print("#"*60)
 
-    # ── M/M/1 : 1 server, infinite queue ─────────────────────────────────────
-    r_mm1 = run_scenario(
-        label         = "M/M/1",
-        num_servers   = 1,
-        queue_capacity= float("inf"),
-    )
+    # r_mm1 = run_scenario(
+    #     label         = "M/M/1",
+    #     num_servers   = 1,
+    #     queue_capacity= float("inf"),
+    # )
 
-    # ── M/M/1/4 : 1 server, system capacity = 4 ──────────────────────────────
-    # queue_capacity here means the waiting-room size; 1 server occupies 1 slot,
-    # so total system capacity = queue_capacity + num_servers = 3 + 1 = 4.
     r_mm14 = run_scenario(
         label         = "M/M/1/4",
         num_servers   = 1,
-        queue_capacity= 3,        # 3 waiting + 1 in service = K=4
+        queue_capacity= 1,
     )
 
-    # ── M/M/1/8 : 1 server, system capacity = 8 ──────────────────────────────
-    r_mm18 = run_scenario(
-        label         = "M/M/1/8",
-        num_servers   = 1,
-        queue_capacity= 7,        # 7 waiting + 1 in service = K=8
-    )
+    # r_mm18 = run_scenario(
+    #     label         = "M/M/1/8",
+    #     num_servers   = 1,
+    #     queue_capacity= 7,
+    # )
 
-    # ── M/M/3/8 : 3 servers, system capacity = 8 ─────────────────────────────
-    r_mm38 = run_scenario(
-        label         = "M/M/3/8",
-        num_servers   = 3,
-        queue_capacity= 5,        # 5 waiting + 3 in service = K=8
-    )
+    # r_mm38 = run_scenario(
+    #     label         = "M/M/3/8",
+    #     num_servers   = 3,
+    #     queue_capacity= 5,
+    # )
 
-    # ── Collect all scenarios for plotting ────────────────────────────────────
     scenarios = {
-        "M/M/1"   : r_mm1,
+        # "M/M/1"   : r_mm1,
         "M/M/1/4" : r_mm14,
-        "M/M/1/8" : r_mm18,
-        "M/M/3/8" : r_mm38,
+        # "M/M/1/8" : r_mm18,
+        # "M/M/3/8" : r_mm38,
     }
 
     print("\n\nGenerating plots …")

@@ -1,4 +1,3 @@
-# queue.py
 from collections import deque
 from message import Message
 

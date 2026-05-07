@@ -1,36 +1,19 @@
-# metrics.py
-# Collects simulation statistics and computes averages via Little's Law.
-#
-# Tracked directly:
-#   - Time-averaged E[N] and E[Nq]  via ∫N(t)dt
-#   - Total arrivals and drops       via counters
-#
-# Derived at finalise() using Little's Law  (λ = arrivals / sim_time):
-#   - E[W] = E[Nq] / λ  (average wait time in queue)
-
-
 class Metrics:
     def __init__(self):
-        # ── Time-averaging state ──────────────────────────────────────────────
         self._last_event_time = 0.0
-        self._area_system     = 0.0   # ∫ N_system(t) dt
-        self._area_queue      = 0.0   # ∫ N_queue(t)  dt
+        self._area_system     = 0.0
+        self._area_queue      = 0.0
 
-        # ── Instant counters (synced from gateway each event) ─────────────────
         self._n_system        = 0
         self._n_queue         = 0
 
-        # ── Totals ────────────────────────────────────────────────────────────
         self._total_arrivals  = 0
         self._total_drops     = 0
 
-        # ── Final averages (set by finalise()) ────────────────────────────────
         self.avg_n_system     = 0.0
         self.avg_n_queue      = 0.0
         self.avg_wait_time    = 0.0
         self.sim_time         = 0.0
-
-    # ── Time-step accumulator ────────────────────────────────────────────────
 
     def advance_time(self, new_time):
         """Accumulate ∫N(t)dt for the interval since the last event."""
@@ -45,8 +28,6 @@ class Metrics:
         self._n_system = n_system
         self._n_queue  = n_queue
 
-    # ── Event-level record calls ─────────────────────────────────────────────
-
     def record_arrival(self):
         """Called when a message is accepted into the system."""
         self._total_arrivals += 1
@@ -55,21 +36,16 @@ class Metrics:
         """Called when a message is rejected because the queue is full."""
         self._total_drops += 1
 
-    # ── Finalise ─────────────────────────────────────────────────────────────
-
     def finalise(self, sim_time):
         """Compute all averages at the end of the simulation."""
         self.sim_time = sim_time
-        self.advance_time(sim_time)   # flush the last interval
+        self.advance_time(sim_time)
 
         self.avg_n_system = self._area_system / sim_time if sim_time > 0 else 0.0
         self.avg_n_queue  = self._area_queue  / sim_time if sim_time > 0 else 0.0
 
-        # Little's Law: E[W] = E[Nq] / λ
         lam = self._total_arrivals / sim_time if sim_time > 0 else 0.0
         self.avg_wait_time = self.avg_n_queue / lam if lam > 0 else 0.0
-
-    # ── Accessors ─────────────────────────────────────────────────────────────
 
     def get_instant_n_system(self):  return self._n_system
     def get_instant_n_queue(self):   return self._n_queue
@@ -78,8 +54,6 @@ class Metrics:
     def get_avg_n_system(self):      return self.avg_n_system
     def get_avg_n_queue(self):       return self.avg_n_queue
     def get_avg_wait_time(self):     return self.avg_wait_time
-
-    # ── Pretty-print ──────────────────────────────────────────────────────────
 
     def print_summary(self):
         print("\n" + "="*55)

@@ -1,4 +1,3 @@
-# event.py
 from enum import Enum
 from message import Message
 
