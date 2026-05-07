@@ -1,48 +1,22 @@
-# simulations.py
-# Runs the four queue models specified in the course slides and produces
-# plots with 95 % confidence intervals for every basic metric.
-#
-# Models
-# ──────
-#  M/M/1      – 1 server, infinite queue
-#  M/M/1/4    – 1 server, system capacity K=4 (queue + server)
-#  M/M/1/8    – 1 server, system capacity K=8
-#  M/M/3/8    – 3 servers, system capacity K=8
-#
-# Parameters (from slides)
-#  lambda values : 4, 6, 8, 12  msgs/sec
-#  mu            : 8             msgs/sec  (service rate per server)
-#  sim_time      : 5000 sec      per run   (long run for stable estimates)
-#  n_runs        : 30            independent replications per (model, lambda)
-#
-# Outputs
-# ──────
-#  Console : summary table for every scenario
-#  Figures : saved as PNG files in ./plots/
-
 import os
 import math
 import random
 import numpy as np
 import matplotlib
-matplotlib.use("Agg")          # non-interactive backend (works without display)
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-from engine import Main        # simulation engine (Run method lives here)
-
-# ── Configuration ─────────────────────────────────────────────────────────────
+from engine import Main
 
 LAMBDAS   = [4, 6, 8, 12]     # arrival rates to test
 MU        = 8                  # service rate per server
-SIM_TIME  = 500.0              # seconds per run (long enough for steady-state, fast enough to run)
+SIM_TIME  = 30.0              # seconds per run (long enough for steady-state, fast enough to run)
 N_RUNS    = 10                 # independent replications for CI
 Z95       = 1.96               # z-score for 95 % confidence interval
 PLOT_DIR  = os.path.join(os.path.dirname(__file__), "plots")
 
 os.makedirs(PLOT_DIR, exist_ok=True)
 
-
-# ── Statistics helpers ────────────────────────────────────────────────────────
 
 def mean_ci(samples):
     """Return (mean, half-width of 95 % CI) for a list of samples."""
@@ -55,8 +29,6 @@ def mean_ci(samples):
     se   = np.std(samples, ddof=1) / math.sqrt(n)
     return float(mu), Z95 * float(se)
 
-
-# ── Single-scenario runner ────────────────────────────────────────────────────
 
 def run_scenario(label, num_servers, queue_capacity, lambdas=LAMBDAS,
                  mu=MU, sim_time=SIM_TIME, n_runs=N_RUNS):
@@ -71,11 +43,10 @@ def run_scenario(label, num_servers, queue_capacity, lambdas=LAMBDAS,
     print(f"  Servers  : {num_servers}   Queue cap : {queue_capacity}   Runs : {n_runs}")
     print(f"{'='*60}")
 
-    # Storage: metric_name -> list over lambdas of list of per-run values
     metric_keys = ["avg_n_system", "avg_n_queue",
-                   "avg_sojourn", "avg_wait", "drop_rate"]
+                   "avg_wait", "drop_rate"]
 
-    results = {k: [] for k in metric_keys}   # each entry is (mean, ci)
+    results = {k: [] for k in metric_keys}
 
     for lam in lambdas:
         per_run = {k: [] for k in metric_keys}
@@ -98,7 +69,6 @@ def run_scenario(label, num_servers, queue_capacity, lambdas=LAMBDAS,
 
             per_run["avg_n_system"].append(m.get_avg_n_system())
             per_run["avg_n_queue" ].append(m.get_avg_n_queue())
-            per_run["avg_sojourn" ].append(m.get_avg_sojourn_time())
             per_run["avg_wait"    ].append(m.get_avg_wait_time())
             per_run["drop_rate"   ].append(
                 m.get_total_drops() / total_sent if total_sent > 0 else 0.0)
@@ -166,12 +136,6 @@ def plot_all(scenarios):
                 ylabel     = "E[Nq] — avg msgs in queue",
                 title      = "Average number in queue (E[Nq])",
                 filename   = "EN_queue.png")
-
-    plot_metric(scenarios,
-                metric_key = "avg_sojourn",
-                ylabel     = "E[T] — avg sojourn time (s)",
-                title      = "Average sojourn time / time in system (E[T])",
-                filename   = "ET_sojourn.png")
 
     plot_metric(scenarios,
                 metric_key = "avg_wait",

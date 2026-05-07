@@ -1,3 +1,7 @@
+# gateway.py
+# Coordinates message flow between Queue and Server(s).
+# Handles arrivals, server allocation, service completion, and drops.
+
 from queue import Queue
 from server import Server
 from message import Message
@@ -9,8 +13,8 @@ class Gateway:
     Coordinates message flow between Queue and Server(s).
 
     An optional `metrics` object (Metrics instance) can be passed to
-    __init__; if present, Gateway will call metrics.record_service_start()
-    whenever a message transitions from the queue into a server.
+    __init__; if present, Gateway will call metrics.record_arrival()
+    and metrics.record_drop() on each arrival event.
     """
 
     def __init__(self, mu, num_servers=1, queue_capacity=float('inf'),
@@ -51,10 +55,6 @@ class Gateway:
 
         scheduler.add_event(dept_event)
 
-        # Notify metrics: message has left the queue and entered service
-        if self._metrics:
-            self._metrics.record_service_start(message, current_time)
-
     # ── Public event handlers ────────────────────────────────────────────────
 
     def handle_arrival(self, message: Message, scheduler) -> bool:
@@ -73,9 +73,8 @@ class Gateway:
             print(f"[LOG] ARRIVAL | MsgID: {message.get_message_id()} "
                   f"bypasses queue directly to Server.")
             self._start_service(message, server, scheduler)
-            # Record arrival in metrics (0 queue wait)
             if self._metrics:
-                self._metrics.record_arrival(message, scheduler.get_current_time())
+                self._metrics.record_arrival()
             return True
 
         # 2. All servers busy — try to enqueue
@@ -89,7 +88,7 @@ class Gateway:
 
         print(f"[LOG] ARRIVAL | MsgID: {message.get_message_id()} queued successfully.")
         if self._metrics:
-            self._metrics.record_arrival(message, scheduler.get_current_time())
+            self._metrics.record_arrival()
         return True
 
     def handle_departure(self, finished_message: Message, scheduler):

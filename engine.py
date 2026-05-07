@@ -299,7 +299,6 @@ class Main:
             # ── MSG_DEPT ─────────────────────────────────────────────────────
             elif etype == EventType.MSG_DEPT:
                 gateway.handle_departure(msg, scheduler)
-                metrics.record_departure(msg, t)
 
             if verbose:
                 Main.GenerateTrace(ev)
