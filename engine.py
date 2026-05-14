@@ -12,7 +12,6 @@ class Main:
 
     @staticmethod
     def GenerateTrace(e):
-        """Print one formatted trace line for an event."""
         e_time = e.get_event_time()
         e_type = e.get_event_type().value
         msg    = e.get_message()
@@ -196,14 +195,10 @@ class Main:
 
     @staticmethod
     def CreateClients(n_clients, lambda_rate, scheduler, sim_time):
-        """
-        Instantiate n_clients Client objects, seed the scheduler with each
-        client's first SEND_MSG event, and return a dict {client_id: Client}.
-        """
         clients_map = {}
         for _ in range(n_clients):
-            c     = Client(lambda_rate=lambda_rate)
-            msg   = c.generate_message(current_time=0.0)
+            c   = Client(lambda_rate=lambda_rate)
+            msg = c.generate_message(current_time=0.0)
             if msg.get_timestamp() <= sim_time:
                 scheduler.add_event(
                     Event(EventType.SEND_MSG,
@@ -215,23 +210,6 @@ class Main:
     def Run(n_clients=1, lambda_rate=4, mu=8,
             num_servers=1, queue_capacity=float('inf'),
             sim_time=500.0, verbose=False):
-        """
-        Full discrete-event simulation loop.
-
-        Parameters
-        ----------
-        n_clients     : number of independent client sources
-        lambda_rate   : arrival rate per client (msgs/sec)
-        mu            : service rate per server (msgs/sec)
-        num_servers   : servers in the gateway
-        queue_capacity: max messages waiting in queue (inf = M/M/c)
-        sim_time      : simulation horizon (seconds)
-        verbose       : if True, print trace line for every event
-
-        Returns
-        -------
-        metrics : Metrics object with all collected statistics
-        """
 
         scheduler   = Scheduler()
         metrics     = Metrics()
@@ -239,8 +217,7 @@ class Main:
                               queue_capacity=queue_capacity,
                               metrics=metrics)
 
-        clients_map = Main.CreateClients(n_clients, lambda_rate,
-                                         scheduler, sim_time)
+        clients_map = Main.CreateClients(n_clients, lambda_rate, scheduler, sim_time)
 
         if verbose:
             print(f"\n{'time':<9} {'node':<5} {'event':<6} {'source':<6} {'dest.':<5} {'msgID'}")
@@ -261,7 +238,7 @@ class Main:
             metrics.sync_counts(gateway.get_n_system(), gateway.get_n_queue())
 
             if etype == EventType.SEND_MSG:
-                recv_time = t + 1.0
+                recv_time = t + 1.0   # 1-second propagation delay
                 if recv_time <= sim_time:
                     scheduler.add_event(
                         Event(EventType.RECV_MSG, event_time=recv_time, message=msg))
@@ -276,8 +253,6 @@ class Main:
                                   message=next_msg))
 
             elif etype == EventType.RECV_MSG:
-                # receive_msg internally calls metrics.record_arrival()
-                # and metrics.record_drop() via the metrics hook in Gateway
                 gateway.receive_msg(msg, scheduler)
 
             elif etype == EventType.MSG_DEPT:

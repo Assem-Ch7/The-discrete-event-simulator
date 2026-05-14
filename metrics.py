@@ -1,21 +1,8 @@
-# metrics.py
-# Collects simulation statistics and computes averages via Little's Law.
-#
-# Tracked directly:
-#   - Time-averaged E[N] and E[Nq]  via ∫N(t)dt
-#   - Total arrivals and drops       via counters
-#
-# Derived at finalise() using Little's Law  (λ = arrivals / sim_time):
-#   - E[W] = E[Nq] / λ  (average wait time in queue)
-#   - E[T] = E[N]  / λ  (average time in gateway = wait + service)
-#   - E[S] = E[T]  - E[W]  (average time spent in servers)
-
-
 class Metrics:
     def __init__(self):
         self._last_event_time = 0.0
-        self._area_system     = 0.0
-        self._area_queue      = 0.0
+        self._area_system     = 0.0   # ∫ N_system(t) dt
+        self._area_queue      = 0.0   # ∫ N_queue(t)  dt
 
         self._n_system        = 0
         self._n_queue         = 0
@@ -31,7 +18,6 @@ class Metrics:
         self.sim_time         = 0.0
 
     def advance_time(self, new_time):
-        """Accumulate ∫N(t)dt for the interval since the last event."""
         dt = new_time - self._last_event_time
         if dt > 0:
             self._area_system += self._n_system * dt
@@ -39,27 +25,22 @@ class Metrics:
         self._last_event_time = new_time
 
     def sync_counts(self, n_system, n_queue):
-        """Update instant counters from the gateway's current state."""
         self._n_system = n_system
         self._n_queue  = n_queue
 
     def record_arrival(self):
-        """Called when a message is accepted into the system."""
         self._total_arrivals += 1
 
     def record_drop(self):
-        """Called when a message is rejected because the queue is full."""
         self._total_drops += 1
 
     def finalise(self, sim_time):
-        """Compute all averages at the end of the simulation."""
         self.sim_time = sim_time
         self.advance_time(sim_time)
 
         self.avg_n_system = self._area_system / sim_time if sim_time > 0 else 0.0
         self.avg_n_queue  = self._area_queue  / sim_time if sim_time > 0 else 0.0
 
-        # Little's Law derivations
         lam = self._total_arrivals / sim_time if sim_time > 0 else 0.0
         self.avg_wait_time = self.avg_n_queue  / lam if lam > 0 else 0.0  # E[W] = E[Nq] / λ
         self.avg_t_system  = self.avg_n_system / lam if lam > 0 else 0.0  # E[T] = E[N]  / λ

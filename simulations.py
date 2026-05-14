@@ -8,36 +8,29 @@ import matplotlib.pyplot as plt
 
 from engine import Main
 
-LAMBDAS   = [4, 6, 8, 12]     # arrival rates to test
-MU        = 8                  # service rate per server
-SIM_TIME  = 30.0              # seconds per run (long enough for steady-state, fast enough to run)
-N_RUNS    = 100                # independent replications for CI
-Z95       = 1.96               # z-score for 95 % confidence interval
+LAMBDAS   = [4, 6, 8, 12]
+MU        = 8
+SIM_TIME  = 30.0
+N_RUNS    = 100
+Z95       = 1.96
 PLOT_DIR  = os.path.join(os.path.dirname(__file__), "plots")
 
 os.makedirs(PLOT_DIR, exist_ok=True)
 
 
 def mean_ci(samples):
-    """Return (mean, half-width of 95 % CI) for a list of samples."""
-    n    = len(samples)
+    n  = len(samples)
     if n == 0:
         return 0.0, 0.0
-    mu   = np.mean(samples)
+    mu = np.mean(samples)
     if n == 1:
         return float(mu), 0.0
-    se   = np.std(samples, ddof=1) / math.sqrt(n)
+    se = np.std(samples, ddof=1) / math.sqrt(n)
     return float(mu), Z95 * float(se)
 
 
 def run_scenario(label, num_servers, queue_capacity, lambdas=LAMBDAS,
                  mu=MU, sim_time=SIM_TIME, n_runs=N_RUNS):
-    """
-    Run n_runs replications for each lambda value.
-
-    Returns a dict keyed by metric name, each value being a list of
-    (mean, ci_half) tuples — one per lambda value.
-    """
     print(f"\n{'='*60}")
     print(f"  Scenario : {label}")
     print(f"  Servers  : {num_servers}   Queue cap : {queue_capacity}   Runs : {n_runs}")
@@ -86,12 +79,7 @@ def run_scenario(label, num_servers, queue_capacity, lambdas=LAMBDAS,
     return results
 
 
-def plot_metric(scenarios, metric_key, ylabel, title, filename,
-                lambdas=LAMBDAS, include_drops=False):
-    """
-    One figure, one subplot per scenario.
-    Each subplot: x-axis = lambda, y-axis = metric mean, error bars = 95 % CI.
-    """
+def plot_metric(scenarios, metric_key, ylabel, title, filename, lambdas=LAMBDAS):
     n_scenarios = len(scenarios)
     fig, axes   = plt.subplots(1, n_scenarios,
                                figsize=(5 * n_scenarios, 4),
@@ -121,8 +109,6 @@ def plot_metric(scenarios, metric_key, ylabel, title, filename,
 
 
 def plot_all(scenarios):
-    """Generate one PNG per metric across all four scenarios."""
-
     plot_metric(scenarios,
                 metric_key = "avg_n_system",
                 ylabel     = "E[N] — avg msgs in system",
@@ -153,7 +139,7 @@ def plot_all(scenarios):
                 title      = "Average time spent in servers (E[S])",
                 filename   = "ES_server.png")
 
-    # Drop rate only meaningful for finite-capacity models
+    # drop rate only meaningful for finite-capacity models
     finite_scenarios = {k: v for k, v in scenarios.items()
                         if "M/M/1/4" in k or "M/M/1/8" in k or "M/M/3/8" in k}
     if finite_scenarios:
@@ -169,30 +155,24 @@ def main():
     print("#  Discrete-Event Simulator — Queue Model Experiments")
     print("#"*60)
 
-    # ── M/M/1 : 1 server, infinite queue ─────────────────────────────────────
     r_mm1 = run_scenario(
         label         = "M/M/1",
         num_servers   = 1,
         queue_capacity= float("inf"),
     )
 
-    # ── M/M/1/4 : 1 server, system capacity = 4 ──────────────────────────────
-    # queue_capacity here means the waiting-room size; 1 server occupies 1 slot,
-    # so total system capacity = queue_capacity + num_servers = 3 + 1 = 4.
     r_mm14 = run_scenario(
         label         = "M/M/1/4",
         num_servers   = 1,
         queue_capacity= 3,        # 3 waiting + 1 in service = K=4
     )
 
-    # ── M/M/1/8 : 1 server, system capacity = 8 ──────────────────────────────
     r_mm18 = run_scenario(
         label         = "M/M/1/8",
         num_servers   = 1,
         queue_capacity= 7,        # 7 waiting + 1 in service = K=8
     )
 
-    # ── M/M/3/8 : 3 servers, system capacity = 8 ─────────────────────────────
     r_mm38 = run_scenario(
         label         = "M/M/3/8",
         num_servers   = 3,
