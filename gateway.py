@@ -49,7 +49,13 @@ class Gateway:
 
         scheduler.add_event(dept_event)
 
+<<<<<<< HEAD
     def handle_arrival(self, message: Message, scheduler) -> bool:
+=======
+    # ── Public event handlers ────────────────────────────────────────────────
+
+    def receive_msg(self, message: Message, scheduler) -> bool:
+>>>>>>> 4c07623 (updated functions to meet new requirements)
         """
         Process a RECV_MSG event.
 
@@ -81,7 +87,7 @@ class Gateway:
             self._metrics.record_arrival()
         return True
 
-    def handle_departure(self, finished_message: Message, scheduler):
+    def departure_msg(self, finished_message: Message, scheduler):
         """
         Process a MSG_DEPT event.
 

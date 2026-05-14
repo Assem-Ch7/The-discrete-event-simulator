@@ -1,3 +1,19 @@
+<<<<<<< HEAD
+=======
+# metrics.py
+# Collects simulation statistics and computes averages via Little's Law.
+#
+# Tracked directly:
+#   - Time-averaged E[N] and E[Nq]  via ∫N(t)dt
+#   - Total arrivals and drops       via counters
+#
+# Derived at finalise() using Little's Law  (λ = arrivals / sim_time):
+#   - E[W] = E[Nq] / λ  (average wait time in queue)
+#   - E[T] = E[N]  / λ  (average time in gateway = wait + service)
+#   - E[S] = E[T]  - E[W]  (average time spent in servers)
+
+
+>>>>>>> 4c07623 (updated functions to meet new requirements)
 class Metrics:
     def __init__(self):
         self._last_event_time = 0.0
@@ -13,6 +29,8 @@ class Metrics:
         self.avg_n_system     = 0.0
         self.avg_n_queue      = 0.0
         self.avg_wait_time    = 0.0
+        self.avg_t_system     = 0.0   # E[T] = E[N] / λ
+        self.avg_s_server     = 0.0   # E[S] = E[T] - E[W]
         self.sim_time         = 0.0
 
     def advance_time(self, new_time):
@@ -44,8 +62,14 @@ class Metrics:
         self.avg_n_system = self._area_system / sim_time if sim_time > 0 else 0.0
         self.avg_n_queue  = self._area_queue  / sim_time if sim_time > 0 else 0.0
 
+<<<<<<< HEAD
+=======
+        # Little's Law derivations
+>>>>>>> 4c07623 (updated functions to meet new requirements)
         lam = self._total_arrivals / sim_time if sim_time > 0 else 0.0
-        self.avg_wait_time = self.avg_n_queue / lam if lam > 0 else 0.0
+        self.avg_wait_time = self.avg_n_queue  / lam if lam > 0 else 0.0  # E[W] = E[Nq] / λ
+        self.avg_t_system  = self.avg_n_system / lam if lam > 0 else 0.0  # E[T] = E[N]  / λ
+        self.avg_s_server  = self.avg_t_system - self.avg_wait_time        # E[S] = E[T]  - E[W]
 
     def get_instant_n_system(self):  return self._n_system
     def get_instant_n_queue(self):   return self._n_queue
@@ -54,6 +78,8 @@ class Metrics:
     def get_avg_n_system(self):      return self.avg_n_system
     def get_avg_n_queue(self):       return self.avg_n_queue
     def get_avg_wait_time(self):     return self.avg_wait_time
+    def get_avg_t_system(self):      return self.avg_t_system
+    def get_avg_s_server(self):      return self.avg_s_server
 
     def print_summary(self):
         print("\n" + "="*55)
@@ -69,4 +95,6 @@ class Metrics:
         print(f"  Avg N in system  (E[N])   : {self.avg_n_system:.4f}")
         print(f"  Avg N in queue   (E[Nq])  : {self.avg_n_queue:.4f}")
         print(f"  Avg waiting time (E[W])   : {self.avg_wait_time:.4f} s")
+        print(f"  Avg time in gway (E[T])   : {self.avg_t_system:.4f} s")
+        print(f"  Avg time in srvr (E[S])   : {self.avg_s_server:.4f} s")
         print("="*55 + "\n")

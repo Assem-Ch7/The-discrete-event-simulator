@@ -8,11 +8,19 @@ import matplotlib.pyplot as plt
 
 from engine import Main
 
+<<<<<<< HEAD
 LAMBDAS   = [8]
 MU        = 8
 SIM_TIME  = 30.0
 N_RUNS    = 10
 Z95       = 1.96
+=======
+LAMBDAS   = [4, 6, 8, 12]     # arrival rates to test
+MU        = 8                  # service rate per server
+SIM_TIME  = 30.0              # seconds per run (long enough for steady-state, fast enough to run)
+N_RUNS    = 100                # independent replications for CI
+Z95       = 1.96               # z-score for 95 % confidence interval
+>>>>>>> 4c07623 (updated functions to meet new requirements)
 PLOT_DIR  = os.path.join(os.path.dirname(__file__), "plots")
 
 os.makedirs(PLOT_DIR, exist_ok=True)
@@ -44,7 +52,7 @@ def run_scenario(label, num_servers, queue_capacity, lambdas=LAMBDAS,
     print(f"{'='*60}")
 
     metric_keys = ["avg_n_system", "avg_n_queue",
-                   "avg_wait", "drop_rate"]
+                   "avg_wait", "avg_t_system", "avg_s_server", "drop_rate"]
 
     results = {k: [] for k in metric_keys}
 
@@ -66,10 +74,12 @@ def run_scenario(label, num_servers, queue_capacity, lambdas=LAMBDAS,
 
             total_sent = m.get_total_arrivals() + m.get_total_drops()
 
-            per_run["avg_n_system"].append(m.get_avg_n_system())
-            per_run["avg_n_queue" ].append(m.get_avg_n_queue())
-            per_run["avg_wait"    ].append(m.get_avg_wait_time())
-            per_run["drop_rate"   ].append(
+            per_run["avg_n_system" ].append(m.get_avg_n_system())
+            per_run["avg_n_queue"  ].append(m.get_avg_n_queue())
+            per_run["avg_wait"     ].append(m.get_avg_wait_time())
+            per_run["avg_t_system" ].append(m.get_avg_t_system())
+            per_run["avg_s_server" ].append(m.get_avg_s_server())
+            per_run["drop_rate"    ].append(
                 m.get_total_drops() / total_sent if total_sent > 0 else 0.0)
 
         rho = lam / (num_servers * mu)
@@ -139,6 +149,22 @@ def plot_all(scenarios):
                 title      = "Average waiting time in queue (E[W])",
                 filename   = "EW_wait.png")
 
+<<<<<<< HEAD
+=======
+    plot_metric(scenarios,
+                metric_key = "avg_t_system",
+                ylabel     = "E[T] — avg time in gateway (s)",
+                title      = "Average time spent in gateway (E[T])",
+                filename   = "ET_system.png")
+
+    plot_metric(scenarios,
+                metric_key = "avg_s_server",
+                ylabel     = "E[S] — avg time in server (s)",
+                title      = "Average time spent in servers (E[S])",
+                filename   = "ES_server.png")
+
+    # Drop rate only meaningful for finite-capacity models
+>>>>>>> 4c07623 (updated functions to meet new requirements)
     finite_scenarios = {k: v for k, v in scenarios.items()
                         if "M/M/1/4" in k or "M/M/1/8" in k or "M/M/3/8" in k}
     if finite_scenarios:

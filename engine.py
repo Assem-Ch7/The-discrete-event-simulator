@@ -128,15 +128,15 @@ class Main:
 
         scheduler._current_time = 1.0
         msg1 = Message(source=1, destination=0, timestamp=1.0)
-        gw.handle_arrival(msg1, scheduler)
+        gw.receive_msg(msg1, scheduler)
 
         scheduler._current_time = 2.0
         msg2 = Message(source=1, destination=0, timestamp=2.0)
-        gw.handle_arrival(msg2, scheduler)
+        gw.receive_msg(msg2, scheduler)
         gw.print_gateway_state()
 
         scheduler._current_time = 3.5
-        gw.handle_departure(msg1, scheduler)
+        gw.departure_msg(msg1, scheduler)
         gw.print_gateway_state()
         print(f"  Total dropped: {gw.get_dropped_count()}")
         print()
@@ -187,10 +187,10 @@ class Main:
                                           message=next_msg))
 
             elif e_type == EventType.RECV_MSG:
-                gateway.handle_arrival(msg, scheduler)
+                gateway.receive_msg(msg, scheduler)
 
             elif e_type == EventType.MSG_DEPT:
-                gateway.handle_departure(msg, scheduler)
+                gateway.departure_msg(msg, scheduler)
 
         gateway.print_gateway_state()
 
@@ -276,10 +276,16 @@ class Main:
                                   message=next_msg))
 
             elif etype == EventType.RECV_MSG:
+<<<<<<< HEAD
                 gateway.handle_arrival(msg, scheduler)
+=======
+                # handle_arrival internally calls metrics.record_arrival()
+                # and metrics.record_drop() via the metrics hook in Gateway
+                gateway.receive_msg(msg, scheduler)
+>>>>>>> 4c07623 (updated functions to meet new requirements)
 
             elif etype == EventType.MSG_DEPT:
-                gateway.handle_departure(msg, scheduler)
+                gateway.departure_msg(msg, scheduler)
 
             if verbose:
                 Main.GenerateTrace(ev)
