@@ -276,13 +276,9 @@ class Main:
                                   message=next_msg))
 
             elif etype == EventType.RECV_MSG:
-<<<<<<< HEAD
-                gateway.handle_arrival(msg, scheduler)
-=======
-                # handle_arrival internally calls metrics.record_arrival()
+                # receive_msg internally calls metrics.record_arrival()
                 # and metrics.record_drop() via the metrics hook in Gateway
                 gateway.receive_msg(msg, scheduler)
->>>>>>> 4c07623 (updated functions to meet new requirements)
 
             elif etype == EventType.MSG_DEPT:
                 gateway.departure_msg(msg, scheduler)

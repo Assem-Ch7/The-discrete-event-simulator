@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 # metrics.py
 # Collects simulation statistics and computes averages via Little's Law.
 #
@@ -13,7 +11,6 @@
 #   - E[S] = E[T]  - E[W]  (average time spent in servers)
 
 
->>>>>>> 4c07623 (updated functions to meet new requirements)
 class Metrics:
     def __init__(self):
         self._last_event_time = 0.0
@@ -62,10 +59,7 @@ class Metrics:
         self.avg_n_system = self._area_system / sim_time if sim_time > 0 else 0.0
         self.avg_n_queue  = self._area_queue  / sim_time if sim_time > 0 else 0.0
 
-<<<<<<< HEAD
-=======
         # Little's Law derivations
->>>>>>> 4c07623 (updated functions to meet new requirements)
         lam = self._total_arrivals / sim_time if sim_time > 0 else 0.0
         self.avg_wait_time = self.avg_n_queue  / lam if lam > 0 else 0.0  # E[W] = E[Nq] / λ
         self.avg_t_system  = self.avg_n_system / lam if lam > 0 else 0.0  # E[T] = E[N]  / λ

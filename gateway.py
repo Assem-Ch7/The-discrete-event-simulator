@@ -49,13 +49,9 @@ class Gateway:
 
         scheduler.add_event(dept_event)
 
-<<<<<<< HEAD
-    def handle_arrival(self, message: Message, scheduler) -> bool:
-=======
     # ── Public event handlers ────────────────────────────────────────────────
 
     def receive_msg(self, message: Message, scheduler) -> bool:
->>>>>>> 4c07623 (updated functions to meet new requirements)
         """
         Process a RECV_MSG event.
 
