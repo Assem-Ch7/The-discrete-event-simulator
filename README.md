@@ -56,6 +56,7 @@ This setup runs all 4 scenarios (**M/M/1**, **M/M/1/4**, **M/M/1/8**, and **M/M/
 * **`metrics.py`:** Statistics collector ($E[N]$, $E[N_q]$, $E[W]$, $E[T]$, $E[S]$, drop rate)
 * **`plots/`:** Output folder for generated PNG plots
 
+```text
 [Client] ──(SEND)──► [Propagation Delay (+1.0s)] ──(RECV)──► [Gateway]
                                                                  │
                                          ┌───────────────────────┴───────────────────────┐
@@ -63,13 +64,18 @@ This setup runs all 4 scenarios (**M/M/1**, **M/M/1/4**, **M/M/1/8**, and **M/M/
                                    [Server Free?]                                [All Servers Busy?]
                                          │                                               │
                                          ▼                                               ▼
-                                  (Direct Service)                                  [Queue Full?]
+                                  (Direct Service)                                 [Queue Full?]
                                          │                                     ┌─────────┴─────────┐
                                          ▼                                     ▼                   ▼
                                    Generate DEPT                           (ENQUEUE)             (DROP)
                                          │                                     │                   │
                                          ▼                                     ▼                   ▼
                                    Advance Clock                         Wait in Queue         Increments
+                                                                               │               Drop Metric
+                                                                               ▼
+                                                                         Next DEPT pulls
+                                                                         from Queue
+```
                                                                                │               Drop Metric
                                                                                ▼
                                                                          Next DEPT pulls
