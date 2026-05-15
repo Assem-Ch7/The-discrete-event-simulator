@@ -56,6 +56,8 @@ This setup runs all 4 scenarios (**M/M/1**, **M/M/1/4**, **M/M/1/8**, and **M/M/
 * **`metrics.py`:** Statistics collector ($E[N]$, $E[N_q]$, $E[W]$, $E[T]$, $E[S]$, drop rate)
 * **`plots/`:** Output folder for generated PNG plots
 
+### Simulation Workflow Diagram
+
 ```text
 [Client] ──(SEND)──► [Propagation Delay (+1.0s)] ──(RECV)──► [Gateway]
                                                                  │
