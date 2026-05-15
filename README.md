@@ -75,7 +75,7 @@ This setup runs all 4 scenarios (**M/M/1**, **M/M/1/4**, **M/M/1/8**, and **M/M/
                                                                                ▼
                                                                          Next DEPT pulls
                                                                          from Queue
-```
                                                                                ▼
+```
                                                                          Next DEPT pulls
                                                                          from Queue
